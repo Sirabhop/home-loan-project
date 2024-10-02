@@ -103,9 +103,7 @@ class predictionPipeline():
         
         self.prediction_results = results_df
         
-        # Export to Excel
-        self._export_predictions(results_df)
-        
+                
         return predictions
 
     def _export_predictions(self, results_df):
@@ -120,15 +118,14 @@ class predictionPipeline():
         
         os.makedirs(self.prediction_output_path, exist_ok=True)
         
-        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
-            self.prediction_results.to_excel(writer, sheet_name='Predictions', index=False)
-            
-            # Write feature importance
-            if hasattr(self.best_model, 'feature_importances_'):
-                feature_importance = pd.DataFrame({
+        results_df.to_excel(filepath, index=False)
+        
+        feature_importance = pd.DataFrame({
                     'Feature': self.selected_features,
                     'Importance': self.best_model.feature_importances_
                 }).sort_values('Importance', ascending=False)
-                feature_importance.to_excel(writer, sheet_name='Feature_Importance', index=False)
+        
+        filename = f"loan_featur_important_{timestamp}.xlsx"
+        feature_importance.to_excel(filename, sheet_name='Feature_Importance', index=False)
             
-            print(f"Predictions and explanations successfully exported to: {filepath}")
+        print(f"Predictions and explanations successfully exported to: {filepath}")
