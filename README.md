@@ -7,3 +7,20 @@ This repository contains a solution for the Home Credit Default Risk Kaggle comp
 Goal: To develop data pipeline, model pipeline, and prediction pipeline for loan classification task
 
 Evaluation:  Area under the ROC curve (AUC).
+
+````
+├── src
+│   ├── metadata.py
+│   ├── modelPipeline.py
+│   ├── predictionPipeline.py
+│   ├── preprocessing.py
+│   └── util.py
+├── predictions
+├── out
+├── model
+├── logs
+├── 0-data-check-ipynb
+├── 1-eda-logical-flow.ipynb
+├── 2-modeling.ipynb
+└── 3-prediction.ipynb
+````
