@@ -1,4 +1,4 @@
-# **home-loan-project**
+# **Home-Loan-Project**
 **Remark:** As part of a homework assignment for a data scientist role at AIA
 
 Home Credit Default Risk Prediction
