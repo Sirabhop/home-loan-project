@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 from typing import Dict, Any
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.preprocessing import MinMaxScaler
 
 class DataQualityChecker:
     """
@@ -91,3 +95,71 @@ class DataQualityChecker:
             r.set_index(keys=['groups', 'index'], inplace=True)
             
         return {"numeric_report": self.numeric_report, "categorical_report": self.categorical_report}
+    
+    
+    
+
+class graphVisualizer():
+    
+    def __init__(self, df):
+        
+        self.df = df
+        
+    def cat(self, index, columns='TARGET', values='SK_ID_CURR', aggfunc='count', p_flag=True):
+        
+        df_pivot = self.df.pivot_table(index=index, columns=columns, values=values, aggfunc=aggfunc)
+        df_pivot_percentage = df_pivot.div(df_pivot.sum(axis=0), axis=1) * 100
+
+        ax = df_pivot_percentage.plot(kind='bar') 
+
+        if p_flag == True:
+            for i, col in enumerate(df_pivot_percentage.columns):
+                for j, val in enumerate(df_pivot_percentage[col]):
+                    plt.text(j, val, f'{val:.1f}%')
+
+        ax.set_ylim(0, 100)
+
+        plt.title(f'Distribution of {index} by {columns} (Percentage)')
+        plt.show()
+        
+    def cdf(self, index, values='TARGET'):
+        
+        sns.ecdfplot(self.df, x=index, hue=values)
+        
+        plt.title(f'Distribution of {index}')
+        plt.show()
+        
+    def hist(self, index, values='TARGET'):
+        
+        sns.histplot(self.df, x=index, hue=values)
+        
+        plt.title(f'Distribution of {index}')
+        plt.show()
+        
+        
+    def pctDfr(self, index, column='TARGET', value='SK_ID_CURR', groupby_flag=True, df=None):
+        if df is not None:
+            pass
+        else:
+            df = self.df.copy()
+            
+        if groupby_flag:
+            
+            to_pivot = df[~df[index].isnull()].reset_index(drop=True)
+            to_pivot[f'P_{index}'] = (round(to_pivot[index].rank(pct=True) * 100, 0)).astype(int)
+
+            df_pivot = to_pivot.pivot_table(index=f'P_{index}', columns=column, values=value, aggfunc='count').reset_index()
+            df_pivot['DFR'] = df_pivot[1] * 100/(df_pivot[0]+df_pivot[1])
+            
+            plt.figure(figsize=(20,4))
+            sns.barplot(df_pivot, x=f'P_{index}', y='DFR')
+        else:
+            df_pivot = df.pivot_table(index=f'{index}', columns=column, values=value, aggfunc='count').reset_index()
+            df_pivot['DFR'] = df_pivot[1] * 100/(df_pivot[0]+df_pivot[1])
+            plt.figure(figsize=(20,4))
+            sns.barplot(df_pivot, x=f'{index}', y='DFR')
+            
+        average_dfr = df_pivot['DFR'].mean()
+        plt.axhline(y=average_dfr, color='r', linestyle='-', label=f'Average DFR: {average_dfr:.2f}%')
+        plt.legend()
+        plt.show()
